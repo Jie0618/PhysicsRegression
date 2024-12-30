@@ -2,8 +2,6 @@
 
 This repository contains code for the paper [A Neural Symbolic Model for Space Physics](XXX).
 
-The code is based on the repository [End-to-end symbolic regression with transformers](https://github.com/facebookresearch/SymbolicMathematics).
-
 ## Install
 
 Using conda and the environment.yml file:
