@@ -63,6 +63,8 @@ Similarly, the most useful hyper-parameters for evaluation are presented in `./b
 
 ## Applications
 
-The `physical` distionary contains 5 physics application including SSN prediction, equator plasma pressure prediction, solar differential rotation prediction, contribution function prediction, lunar tide effect prediction.
+rediction, equator plasma pressure prediction, solar differential rotation prediction, contribution function prediction, lunar tide effect prediction.
 
 The data for each physics cases can be found from [link](https://drive.google.com/drive/folders/1mS_BA-T7xupP3KgiMQ_I6mVfheXf7H2X?usp=share_link), and should be placed in the `physical/data` directory in each physics cases.
+
+There are five Jupyter notebooks in the `physical` directory, each corresponding to one of the five real-world physics Symbolic Regression cases in the paper. These applications depend on the code of PhysicsRegression. To generate the predicted formula using PhysicsRegression, you need to open the `PhysicsRegression` repository and run these notebooks.
