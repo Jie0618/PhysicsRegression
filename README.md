@@ -17,7 +17,7 @@ A pre-trained model training on 6M synthetic formulas is avaliable from [link](h
 
 After downoading and replace it with the empty `model.pt` file, you can play with `example.ipynb` as a demo example.
 
-Other data which is necessary for training or evaluation can be downloaded from [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should be placed in the `data` directory.
+Other data which is necessary for training, evaluation and physics applications can be downloaded from [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should be placed in the `data` directory.
 
 ## Training
 
@@ -29,14 +29,14 @@ We also includes a template for the training of our Physics Regressor model, usi
 
 `bash ./bash/train.sh`
 
-The training process consists of 100 epochs, with each epoch containing 500 training steps. The training time for each epoch ranges from 10 to 30 minutes when using a single 80GB A100 GPU. Occasionally, you may encounter the "CUDA: Out of Memory" error due to insufficient memory. In such cases, you can reduce the `tokens_per_batch` parameter, which defines the maximum number of tokens per batch, and increase `max_epoch` or `n_steps_per_epoch` to maintain the same total amount of training data.
+The training process consists of 100 epochs, with each epoch containing 500 training steps. The training time for each epoch ranges from 10 to 30 minutes when using a single 80GB A100 GPU. Occasionally, you may encounter the "CUDA: Out of Memory" error due to insufficient memory. In such cases, you can reduce the `tokens_per_batch` parameter, which defines the maximum number of tokens per batch, and increase `max_epoch` or `n_steps_per_epoch` parameter to maintain the same amount of training data. However, this may lead to different training outcomes.
 
 The most useful hyper-parameters are presented in `./bash/train.sh`, which is listed below, while the others related are specified in parsers.py, and environment hyper-parameters are in envs/environment.py.
 
-- **`expr_train_data_path`**: The path to dataset for training. You can use our synthetic data in `data/exprs_train`, avaiable at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
-- **`expr_valid_data_path`**: The path to dataset for validation. You can use our synthetic data in `data/exprs_valid`, avaiable at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
-- **`sub_expr_train_path`**: The path to sub-formula dataset for training. You can use our synthetic data in `data/exprs_seperated_train`, avaiable at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
-- **`sub_expr_valid_path`**: The path to sub-formula dataset for validation. You can use our synthetic data in `data/exprs_seperated_valid`, avaiable at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`expr_train_data_path`**: The path to dataset for training. You can use our synthetic data in `data/exprs_train`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`expr_valid_data_path`**: The path to dataset for validation. You can use our synthetic data in `data/exprs_valid`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`sub_expr_train_path`**: The path to sub-formula dataset for training. You can use our synthetic data in `data/exprs_seperated_train`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`sub_expr_valid_path`**: The path to sub-formula dataset for validation. You can use our synthetic data in `data/exprs_seperated_valid`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
 - **`max_epoch`**: The maximum training epochs.
 - **`n_steps_per_epoch`**: The maximum training steps for each epoch.
 - **`max_len`**: The maximum number of datapoints for each formula.
@@ -63,11 +63,12 @@ Similarly, the most useful hyper-parameters for evaluation are presented in `./b
 - **`oraclename`**: The path to save oracle neural network model.
 - **`max_len`**: The number of datapoints for each formula.
 - **`reload_checkpoint`**: The path to reload model or checkpoint (default to `model.pt`).
+- **`expr_test_data_path`**: The path to the evaluation dataset (default to `./data/exprs_test_ranked.json`).
 
 ## Applications
 
 The `physical` directory contains 5 physics application including SSN prediction, equator plasma pressure prediction, solar differential rotation prediction, contribution function prediction, lunar tide effect prediction.
 
-The data for each physics cases can be found from [link](https://drive.google.com/drive/folders/1mS_BA-T7xupP3KgiMQ_I6mVfheXf7H2X?usp=share_link), and should be placed in the `physical/data` directory in each physics cases.
+The data for each physics cases can be found from [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should also be placed in the `./data` directory, as mentioned above.
 
 There are five Jupyter notebooks in the `physical` directory, each corresponding to one of the five real-world physics Symbolic Regression cases in the paper. These applications depend on the code of PhysicsRegression. To generate the predicted formula using PhysicsRegression, you need to open the `PhysicsRegression` repository and run these notebooks.
