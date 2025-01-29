@@ -1,9 +1,3 @@
-# (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-
 from logging import getLogger
 
 # from .generators import operators_conv, Node

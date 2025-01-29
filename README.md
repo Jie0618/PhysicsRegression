@@ -29,6 +29,8 @@ We also includes a template for the training of our Physics Regressor model, usi
 
 `bash ./bash/train.sh`
 
+The training process consists of 100 epochs, with each epoch containing 500 training steps. The training time for each epoch ranges from 10 to 30 minutes when using a single 80GB A100 GPU. Occasionally, you may encounter the "CUDA: Out of Memory" error due to insufficient memory. In such cases, you can reduce the `tokens_per_batch` parameter, which defines the maximum number of tokens per batch, and increase `max_epoch` or `n_steps_per_epoch` to maintain the same total amount of training data.
+
 The most useful hyper-parameters are presented in `./bash/train.sh`, which is listed below, while the others related are specified in parsers.py, and environment hyper-parameters are in envs/environment.py.
 
 - **`expr_train_data_path`**: The path to dataset for training. You can use our synthetic data in `data/exprs_train`, avaiable at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
@@ -39,6 +41,7 @@ The most useful hyper-parameters are presented in `./bash/train.sh`, which is li
 - **`n_steps_per_epoch`**: The maximum training steps for each epoch.
 - **`max_len`**: The maximum number of datapoints for each formula.
 - **`eval_size`**: The number of validation formulas after each training epoch.
+- **`tokens_per_batch`**: The maximum token count per training batch.
 
 ## Evaluation
 
@@ -50,7 +53,7 @@ Using our pre-trained model to evaluate, run the following command to evaluate t
 
 If you want to use trained model on your own, just reload checkpoint by modifying parameter `reload_checkpoint` to the path of your training checkpoint.
 
-The Divide-and-Conquer strategy require training of oracle model, which is a little time-consuming. If you want to skip this, you can also downloaded our small oracle model from [link](https://drive.google.com/drive/folders/1VfH7Rp25U_pE504uhEd7dhSyvsBSXHdo), which should be placed at `Oracle_model` dictionary.
+The Divide-and-Conquer strategy require training of oracle model, which is a little time-consuming. If you want to skip this, you can also downloaded our small oracle model from [link](https://drive.google.com/drive/folders/1VfH7Rp25U_pE504uhEd7dhSyvsBSXHdo), which should be placed at `Oracle_model` directory.
 
 Similarly, the most useful hyper-parameters for evaluation are presented in `./bash/eval_synthetic.sh`, which is listed below,
 
@@ -63,7 +66,7 @@ Similarly, the most useful hyper-parameters for evaluation are presented in `./b
 
 ## Applications
 
-rediction, equator plasma pressure prediction, solar differential rotation prediction, contribution function prediction, lunar tide effect prediction.
+The `physical` directory contains 5 physics application including SSN prediction, equator plasma pressure prediction, solar differential rotation prediction, contribution function prediction, lunar tide effect prediction.
 
 The data for each physics cases can be found from [link](https://drive.google.com/drive/folders/1mS_BA-T7xupP3KgiMQ_I6mVfheXf7H2X?usp=share_link), and should be placed in the `physical/data` directory in each physics cases.
 

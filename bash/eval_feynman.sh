@@ -21,5 +21,6 @@ do
                 --eval_noise_gamma 0\
                 --eval_noise_type additive\
                 --expr_data feynman\
-                --reload_checkpoint ./model.pt
+                --reload_checkpoint ./model.pt\
+                --expr_test_data_path ./data/exprs_test_ranked.json
 done

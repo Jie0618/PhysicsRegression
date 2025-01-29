@@ -67,9 +67,6 @@ if __name__ == "__main__":
     params = parser.parse_args()
 
     #params
-    params.expr_train_data_path = "./data/exprs_train.json"
-    params.expr_valid_data_path = "./data/exprs_valid.json"
-    params.expr_test_data_path = "./data/exprs_test_ranked.json"
     params.rescale = False
     params.generate_datapoints_distribution = "positive,single"
     params.max_trials = 1000
@@ -77,6 +74,10 @@ if __name__ == "__main__":
     params.max_number_bags = -1
  
     np.random.seed(2024+params.repeat_trials)
+
+    if params.expr_data != "feynman" and\
+          (params.expr_test_data_path is None or params.expr_test_data_path == ""):
+        raise FileNotFoundError("Please follow README and place the testing dataset into `./data` directory.")
 
     evaluator, logger = init_eval(params)
     evaluator.set_env_copies(["test"])
