@@ -407,6 +407,18 @@ class PhyReg():
 
             best_gens = best_gens_bfgs
 
+            for i in range(len(best_gens)):
+                if "_mse" not in best_gens[i]:
+                    expr = str(best_gens[i]["predicted_tree"])
+                    for k,v in {
+                        "add": "+", "mul": "*", "sub": "-", "pow": "**", "inv": "1/", "neg": "-"
+                    }.items():
+                        expr = expr.replace(k, v)
+                    x_variables = [sp.Symbol('x_{}'.format(t)) for t in range(x[i].shape[1])]
+                    f = sp.lambdify(x_variables, expr, "numpy")
+                    pred = f(*x[i].T)
+                    best_gens[i]["_mse"] = self.eval_metric(y[i], pred)
+
             self.best_gens = best_gens
             if verbose:
                 self.express_best_gens(best_gens)

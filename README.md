@@ -2,7 +2,11 @@
 
 This repository contains code for the paper [A Neural Symbolic Model for Space Physics](XXX).
 
-## Install
+If you encounter any problems with this program, please contact Jie Ying yingj24@mails.tsinghua.edu.cn.
+
+![OverallFramework](figs/framework.png)
+
+## Installation
 
 Using conda and the environment.yml file:
 
@@ -72,3 +76,7 @@ The `physical` directory contains 5 physics application including SSN prediction
 The data for each physics cases can be found from [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should also be placed in the `./data` directory, as mentioned above.
 
 There are five Jupyter notebooks in the `physical` directory, each corresponding to one of the five real-world physics Symbolic Regression cases in the paper. These applications depend on the code of PhysicsRegression. To generate the predicted formula using PhysicsRegression, you need to open the `PhysicsRegression` repository and run these notebooks.
+
+## Lisence
+
+This project is covered under the Apache 2.0 License.
