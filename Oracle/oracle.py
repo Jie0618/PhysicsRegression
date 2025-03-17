@@ -562,50 +562,6 @@ class Oracle():
 
         return groups, sep_type, sep_idxs
 
-        """add_threshold = self.add_threshold(mse)
-        mul_threshold = self.mul_threshold(mse)
-
-        add_sep = []
-        for i in range(num_variables):
-            for j in range(i+1, num_variables):
-                if abs(diff[i][j]) < add_threshold:
-                    add_sep.append([i, j])
-        
-        mul_sep = []
-        for i in range(num_variables):
-            for j in range(i+1, num_variables):
-                if abs(diff_log[i][j]) < mul_threshold:
-                    mul_sep.append([i, j])
-
-        sep_type = "add" if len(add_sep) > len(mul_sep) else "mul"
-
-        sep = add_sep if sep_type == "add" else mul_sep
-
-        groups = [np.arange(num_variables)]
-
-        for idx in sep:
-            for i in range(len(groups)):
-                idx0 = groups[i]==idx[0]
-                idx1 = groups[i]==idx[1]
-                if any(idx0) and any(idx1):
-                    groups0 = groups[i][~idx0]
-                    groups1 = groups[i][~idx1]
-                    groups[i] = groups0
-                    groups.append(groups1)
-        
-        idx_to_delete = []
-        for i in range(len(groups)):
-            for j in range(len(groups)):
-                if  i == j: continue
-                #if all(np.isin(groups[i], groups[j])):
-                if all([ele in groups[j] for ele in groups[i]]):
-                    if len(groups[i]) == len(groups[j]):
-                        idx_to_delete.append(max(i, j))
-                    else:
-                        idx_to_delete.append(i)
-
-        return [groups[i] for i in range(len(groups)) if i not in idx_to_delete], sep_type"""
-     
     def merge_groups(self, sep_groups, sep_types):
         
         merged_groups = []
@@ -905,6 +861,9 @@ class Oracle():
                     "loss": mse,
                 }
                 if save_model:
+                    folder_path = os.path.dirname(filename)
+                    if not os.path.exists(folder_path):
+                        os.makedirs(folder_path)
                     torch.save(model_state, filename)
                 maxi_y = maxi_y.item()
 

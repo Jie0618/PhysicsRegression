@@ -541,10 +541,6 @@ class MCTS():
 
                 max_reward, best_expr, best_productions = self.simulation(node, xy, nt)
 
-                #NOTE:
-                #this is different from basic SPL
-                #self.update_module(best_productions, best_expr, max_reward)
-
                 if max_reward > self.best_solution[2]:
                     
                     stack = [self.root]

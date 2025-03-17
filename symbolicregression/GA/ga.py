@@ -975,27 +975,6 @@ class GeneticProgramming():
 
         return True
 
-
-    def delete_random_node(self, individual, num_variables):
-        """
-        delete a random node,
-        i.e. replace the whole node with a random const/variable
-
-        not same as PySR
-        """
-        node, parent, idx = self._random_node_with_parent(individual.node)
-
-        if parent is None:
-            leaf = self.make_random_leaf(num_variables)
-            individual.node = leaf
-        elif parent.value in self.unary_op:
-            leaf = self.make_random_leaf(num_variables)
-            parent.children = [leaf]
-        elif parent.value in self.binary_op:
-            leaf = self.make_random_leaf(num_variables)
-            parent.children[idx] = leaf
-
-#####seems not good as mine
     def delete_random_node_PySR(self, individual, num_variables):
         """
         Select a random node,
