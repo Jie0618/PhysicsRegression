@@ -48,16 +48,8 @@ def build_modules(env, params):
         positional_embeddings=params.dec_positional_embeddings,
     )
 
-    if params.reload_model == "/data/guyuntian/linhw/yingjie/model.pt":
-        logger.info(f"Reloading modules from {params.reload_model} ...")
-        reloaded = torch.load(params.reload_model)
-        modules["embedder"] = reloaded.embedder
-        modules["encoder"] = reloaded.encoder
-        modules["decoder"] = reloaded.decoder
-
-
     # reload pretrained modules
-    elif params.reload_model != "":
+    if params.reload_model != "":
         logger.info(f"Reloading modules from {params.reload_model} ...")
         reloaded = torch.load(params.reload_model)
         for k, v in modules.items():

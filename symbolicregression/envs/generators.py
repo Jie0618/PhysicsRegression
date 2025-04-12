@@ -6,22 +6,18 @@ import numpy as np
 import math
 import scipy.special
 import copy
-from logging import getLogger
 import time
 from collections import defaultdict
 from scipy.stats import special_ortho_group
 from timeout_decorator import timeout
-import os
-
-from symbolicregression.envs import encoders
-from symbolicregression.envs.node import Node
-from symbolicregression.envs.operators import *
-
-logger = getLogger()
 import random
 import pandas as pd
 import traceback
 import json
+
+from symbolicregression.envs import encoders
+from symbolicregression.envs.node import Node
+from symbolicregression.envs.operators import *
 
 
 class Generator(ABC):
@@ -454,7 +450,7 @@ class RandomFunctions(Generator):
                 is_float = False
 
             if infix_stack[i] == "-" and is_float_next and\
-                i > 0 and infix_stack[i-1] in ["+", "-", "*", "(", "^"]:
+                i > 0 and infix_stack[i-1] in ["+", "-", "*", "(", "/", "^"]:
                 #!
                 infix_stack[i+1] = str(-f)
             elif infix_stack[i] == "-" and infix_stack[i-1] == "(":

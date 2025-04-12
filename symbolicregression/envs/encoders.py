@@ -184,8 +184,6 @@ class Equation(Encoder):
     def _decode(self, lst):
         if len(lst) == 0:
             return None, 0
-        # elif (lst[0] not in self.symbols) and (not lst[0].lstrip("-").replace(".","").replace("e+", "").replace("e-","").isdigit()):
-        #     return None, 0
         elif "OOD" in lst[0]:
             return None, 0
         elif lst[0].lower() in self.all_operators.keys():
@@ -238,8 +236,6 @@ class Equation(Encoder):
         # [operator, units, operator, units, ...]
         if len(lst) == 0:
             return None, 0
-        # elif (lst[0] not in self.symbols) and (not lst[0].lstrip("-").replace(".","").replace("e+", "").replace("e-","").isdigit()):
-        #     return None, 0
 
         pos = 0
 
@@ -389,8 +385,6 @@ class Equation(Encoder):
     def _decode_with_units3(self, lst, units):
         if len(lst) == 0:
             return None, 0
-        # elif (lst[0] not in self.symbols) and (not lst[0].lstrip("-").replace(".","").replace("e+", "").replace("e-","").isdigit()):
-        #     return None, 0
 
         pos = 0
         unit = units[pos]

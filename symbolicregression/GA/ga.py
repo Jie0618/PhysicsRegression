@@ -285,67 +285,6 @@ class DataRecorder():
         with open(path, "w") as fi:
             fi.write(s)
 
-def _bfgs(expr, xy, dimension, x0):
-    """
-    standard const optimize internal function
-
-    using for optimize all the `skeleton` in the expression 
-
-    Parameters
-    ----------
-    expr : Str
-        the infix form of the expression
-    
-    xy : tuple
-        input-output data pairs, of shape ((n_data, n_features), (n_data, 1))
-    
-    dimension : int
-        dimension/feature nums
-    
-    x0 : ndarray
-        the initial point for optimize, of shape (n_features,)
-    
-    Returns
-    -------
-    x0 : ndarray
-        the optimized const
-    """
-
-    (x, y) = xy
-
-    #make up variables
-    x_variables = [sp.Symbol('x_{}'.format(i)) for i in range(x.shape[1])]
-    c_variables = [sp.Symbol('c_{}'.format(i)) for i in range(dimension)]
-    
-    for i in range(dimension):
-        expr = expr.replace("skeleton", "c_{}".format(i), 1)
-
-    expr = expr.replace("pow", "**")
-    expr = expr.replace("add", "+")
-    expr = expr.replace("sub", "-")
-    expr = expr.replace("mul", "*")
-    expr = expr.replace("div", "/")
-
-    #lambdify function
-    func = sp.lambdify(x_variables+c_variables, expr, [{
-        "neg": np.negative, 
-        "inv": lambda x : 1/x
-    }, "numpy"])
-    
-    #MSE
-    def loss(c, x, y):
-        pred = np.array([func(*x.T, *c)])
-        return np.sum(np.square(pred.reshape((-1)) - y.reshape((-1))))
-    
-    #bfgs 
-    try:
-        #some x-y may cause error
-        res = minimize(loss, x0=x0, args=(x, y), method='BFGS')
-        return res.x
-    except:
-        return x0
-
-
 def bfgs_gp(node, xy, oracle, include_const=True):
     """
     const optimize for genetic programming
@@ -388,8 +327,6 @@ def bfgs_gp(node, xy, oracle, include_const=True):
             node = node.children[0]
 
     return refined_node
-
-
 
 class TreeGenerator(): 
     def __init__(self,
@@ -473,12 +410,9 @@ class TreeGenerator():
         ptr = -1
 
         while n > 0:
-            #sample position
             weights = self.D_binary[:e, n]/np.sum(self.D_binary[:e, n]) if e != 1 else [1]
             pos = rng.choice(range(e), p=weights)
 
-            #sample op
-            #the rest is leaf
             op = rng.choice(self.binary_op, p=self.binary_op_probability)
 
             ptr += pos +1
@@ -489,7 +423,6 @@ class TreeGenerator():
             nodes[ptr].push_children(right)
             nodes += [left,right]
             
-            #update
             e = e - pos +1
             n -= 1
         
@@ -745,11 +678,6 @@ class GeneticProgramming():
 
 
     def _random_node(self, node):
-        """
-        return a random node from the tree
-
-        same as PySR
-        """
         if node.degree == 0:
             return node
         elif node.degree == 1:
@@ -774,11 +702,6 @@ class GeneticProgramming():
             print("unexpected node.value:", node.value)
 
     def _random_node_with_parent(self, node, parent=None, idx=-1):
-        """
-        return a random node with its parent from the tree
-
-        same as PySR
-        """
         if node.degree == 0:
             return node, parent, idx
         elif node.degree == 1:
@@ -871,12 +794,6 @@ class GeneticProgramming():
 
 
     def append_random_op(self, individual, num_variables, UNARY_ONLY=False):
-        """
-        Add a random unary/binary operation to the end of a tree
-        
-        not same as PySR:
-        cause we do keep the origin node as a leaf
-        """
         node, parent, idx = self._random_node_with_parent(individual.node)
         while node.degree > 0:
             node, parent, idx = self._random_node_with_parent(individual.node)
@@ -904,13 +821,7 @@ class GeneticProgramming():
         else:
             parent.children[idx] = new_node
 
-#####seems not good as mine
     def append_random_op_PySR(self, individual, num_variables):
-        """
-        Add a random unary/binary operation to the end of a tree
-        
-        same as PySR
-        """
         node, parent, idx = self._random_node_with_parent(individual.node)
         while node.degree > 0:
             node, parent, idx = self._random_node_with_parent(individual.node)
@@ -976,12 +887,6 @@ class GeneticProgramming():
         return True
 
     def delete_random_node_PySR(self, individual, num_variables):
-        """
-        Select a random node,
-        and replace it with a variable or constant
-
-        same as PySR
-        """
         node, parent, idx = self._random_node_with_parent(individual.node)
 
         if node.degree <= 0:
@@ -1120,8 +1025,6 @@ class GeneticProgramming():
 
             
             #fourthly, check some useless const
-
-
 
         elif node.degree == 2:
             #firstly, deal with the bottom node
@@ -1353,10 +1256,6 @@ class GeneticProgramming():
                             op = "mul"
                         except:
                             pass
-                        #TODO:!!!!!
-
-
-
 
 
                 if op is not None:
@@ -1409,10 +1308,6 @@ class GeneticProgramming():
                             op = "div"
                         except:
                             pass
-                        #TODO:!!!
-
-
-
 
                     #(xxx / const) / const --> const * xxx
                     elif node.children[0].children[1].is_const:
@@ -1422,12 +1317,6 @@ class GeneticProgramming():
                             op = "mul"
                         except:
                             pass
-                        #TODO:!!!
-
-
-
-
-
 
                 elif node.children[1].value == "mul" and node.children[0].is_const:
                     #const / (const * xxx) --> const / xxx
@@ -1838,22 +1727,6 @@ class GeneticProgramming():
         self.timerecorder = TimeRecorder()
         self.datarecorder = DataRecorder()
 
-        """for i in range(self.population_num):
-            #record the best in this population at each complexity
-            best_of_temp = best_of_population[i]
-            for individual in populations[i]:
-                complexity = individual.complexity
-                best_of_temp.add(individual, min(complexity, self.max_complexity))
-            best_of_population[i] = best_of_temp
-            
-            #record the best of all the populations
-            best_of_all.union(best_of_temp)
-        
-        early_stop = False
-        for k, v in best_of_all.frontier.items():
-            if np.abs(v.loss) < self.eps:
-                return best_of_all"""
-        
         for epoch in range(self.epochs):
             
             if verbose:

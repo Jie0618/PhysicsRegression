@@ -15,7 +15,7 @@ do
                 --max_len 200\
                 --eval_start_from 0\
                 --current_eval_pos 0\
-                --device cuda:1\
+                --device cuda:0\
                 --add_consts 0\
                 --decode_physical_units single-seq\
                 --eval_noise_gamma 0\

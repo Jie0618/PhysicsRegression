@@ -1,3 +1,7 @@
+# train_test_split.py
+# select the training and validation and testing dataset
+# carefully depend on their similarity
+
 import json
 import sympy as sp
 import numpy as np
@@ -47,7 +51,7 @@ def exchange_node(tree):
 
 ########## INITIALIZE ##########
 
-with open("/home/linhw/yingjie/data/preprocess_results_final_v3.json", "r") as fi:
+with open("./data/preprocess_results_final_v3.json", "r") as fi:
     exprs = json.load(fi)
 
 parser = get_parser()
@@ -252,11 +256,6 @@ for corr_type in corr_types:
                         s += f"{_corrs[len(_train_feature):,:-len(test_feature)][_i][_j]} {_corrs_log[len(_train_feature):,:-len(test_feature)][_i][_j]}\n\n"
                         break
 
-                #if _j % 50 == 49:
-                #    with open("/home/linhw/yingjie/test.txt", "a") as fi:
-                #        fi.write(s)
-                #    s = ""
-                        
         eval_train += min(10000, res_train)
         res_train -= 10000
         if res_train <= 0:
@@ -269,6 +268,3 @@ target_exprs_train = sorted(target_exprs_train, key=lambda x:order_dict[x])
 print(f"total {len(target_exprs_train)} exprs for training")
 with open("./data/exprs_train.json", "w") as fi:
     json.dump(target_exprs_train, fi)
-
-#with open("/home/linhw/yingjie/test.txt", "a") as fi:
-#    fi.write(s)

@@ -125,9 +125,12 @@ def main(params):
             )
             logger.info("__log__:%s" % json.dumps(scores))
 
-        trainer.save_best_model(scores, prefix="functions", suffix="fit")
-        # end of epoch
-        trainer.end_epoch(scores)
+        if scores is not None:
+            trainer.save_best_model(scores, prefix="functions", suffix="fit")
+            trainer.end_epoch(scores)
+        else:
+            trainer.save_checkpoint("checkpoint")
+            trainer.epoch += 1
 
 
 if __name__ == "__main__":

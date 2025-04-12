@@ -1,4 +1,5 @@
-#seperate the whole expr into some small sub-exprs
+# seperate_main.py
+# seperate the whole expr into some small sub-exprs
 
 import json
 import sympy as sp

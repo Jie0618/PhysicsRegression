@@ -7,8 +7,6 @@ import re
 from sklearn.metrics import r2_score
 from scipy.optimize import minimize
 
-from parsers import get_parser
-import symbolicregression
 from symbolicregression.envs import build_env
 from symbolicregression.model import build_modules
 from symbolicregression.model.sklearn_wrapper import SymbolicTransformerRegressor
@@ -378,6 +376,11 @@ class PhyReg():
                     refinement_type="NoRef", dataset_idx=-1, with_infos=True
                 )
             )
+            best_gens_bfgs = copy.deepcopy(
+                self.dstr.retrieve_tree(
+                    refinement_type="BFGS", dataset_idx=-1, with_infos=True
+                )
+            )
             
             if verbose: print("Back aggregating formulas...", end="\n")
 
@@ -399,6 +402,11 @@ class PhyReg():
 
             self.dstr.fit(x, y, hints, verbose=verbose, refinement_types=["id"])
 
+            best_gens_noref = copy.deepcopy(
+                self.dstr.retrieve_tree(
+                    refinement_type="NoRef", dataset_idx=-1, with_infos=True
+                )
+            )
             best_gens_bfgs = copy.deepcopy(
                 self.dstr.retrieve_tree(
                     refinement_type="BFGS", dataset_idx=-1, with_infos=True
@@ -422,6 +430,9 @@ class PhyReg():
             self.best_gens = best_gens
             if verbose:
                 self.express_best_gens(best_gens)
+
+        self.best_gens_noref = best_gens_noref
+        self.best_gens_bfgs = best_gens_bfgs
             
 
         ################### MCTS ###################
@@ -650,7 +661,7 @@ class PhyReg():
                 self.express_best_gens(best_gens_refined)
             self.best_gens_refined = best_gens_refined
 
-    def constant_optimization(self, best_gens, x, y):
+    def constant_optimization(self, best_gens, x, y, sigma=1):
 
         best_gens_refined = copy.deepcopy(best_gens)
 
@@ -673,7 +684,7 @@ class PhyReg():
             for trial in range(self.params.num_bfgs):
                 
                 new_consts = copy.deepcopy(consts)
-                if trial > 0:new_consts = new_consts + np.random.normal(0, 1, new_consts.shape)
+                if trial > 0:new_consts = new_consts + np.random.normal(0, sigma, new_consts.shape)
                 new_expr = copy.deepcopy(expr)
 
                 new_consts = self._const_optimize(new_expr, (x[i], y[i]), len(consts), new_consts)

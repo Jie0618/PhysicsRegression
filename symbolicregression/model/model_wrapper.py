@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import copy
 
 
 def chunks(lst, n):
@@ -55,7 +56,18 @@ class ModelWrapper(nn.Module):
         #TODO:!!!
         #at now, we require units as hints! cant ignore it!!!
         #cause we need it for after process
-        units = hints[0]
+        assert "units" in env.params.use_hints
+
+        if "units" in env.params.use_hints:
+            units = hints[0]
+
+        # here we made a confusion
+        # when use_hints == "units" only, it mean we do not require any hints
+        # we denote this cause we require units after process
+        if env.params.use_hints == "units":
+            hints[0] = [[] for _ in range(len(hints[0]))]
+            #print(units, hints)
+            #assert False
 
         B, T = len(input), max([len(xi) for xi in input])
         outputs = [[], [], []]
@@ -187,8 +199,7 @@ class ModelWrapper(nn.Module):
                 )
                 x_len = x_len.unsqueeze(1).expand(bs, num_samples).contiguous().view(-1)
 
-                #!!!TODO!!!
-                sampling_x_unit = [u for u in unit.copy() for _ in range(num_samples)]           #BE CAREFUL!!!
+                sampling_x_unit = [u for u in copy.deepcopy(unit) for _ in range(num_samples)]
 
                 #sampling
                 (

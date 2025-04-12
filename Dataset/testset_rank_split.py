@@ -1,3 +1,6 @@
+# testset_rank_split.py
+# split the testing dataset into simple/medium/hard level
+
 import json
 import sympy as sp
 import numpy as np
@@ -55,9 +58,9 @@ if test_rank:
     ########## INITIALIZE ##########
 
     with open("./data/exprs_train.json", "r") as fi:
-        exprs_train = json.load(fi)#[:102]
+        exprs_train = json.load(fi)
     with open("./data/exprs_test.json", "r") as fi:
-        exprs_test = json.load(fi)#[:14]
+        exprs_test = json.load(fi)
 
     parser = get_parser()
     params = parser.parse_args()
@@ -134,7 +137,6 @@ if test_rank:
     )
 
     s = ""
-
     for corr_type in corr_types:
         n1, n2 = corr_type.split("_")
 
@@ -183,7 +185,6 @@ if test_rank:
             if res_train <= 0:
                 flag = True
 
-
     # about 800 formulas has corrs > 0.95
     # about 300 formulas has 0.95 >= corrs > 0.8
     # about 200 formulas has corrs <= 0.8
@@ -206,8 +207,6 @@ if test_rank:
 
     with open("./data/exprs_test_ranked.json", "w") as fi:
         json.dump(exprs_test_ranked, fi)
-
-
 
 
 if feynman_rank:
@@ -297,7 +296,6 @@ if feynman_rank:
     )
 
     s = ""
-
     for corr_type in corr_types:
         n1, n2 = corr_type.split("_")
 
@@ -339,8 +337,7 @@ if feynman_rank:
             _corrs_maxi[idx_test] = _corrs_outer
 
             maxi_corr = np.maximum(maxi_corr, _corrs_maxi)
-
-                
+ 
             eval_train += min(10000, res_train)
             res_train -= 10000
             if res_train <= 0:

@@ -1,5 +1,3 @@
-import sys, os
-
 from copy import deepcopy
 import numpy as np
 import sympy as sp
@@ -270,18 +268,13 @@ class MCTS():
         
         func = sp.lambdify(x_variables+c_variables, expr, 'numpy')
         
-        #MSE
         def loss(c, x, y):
             pred = np.array([func(*x.T, *c)])
             return np.linalg.norm(pred.reshape((-1)) - y.reshape((-1)), 2)
         
-        #restore the process
         F_loss = []
         consts = []
-
-        #bfgs n times
         for i in range(n_restart):
-
             try:
                 x0 = np.random.randn(dimension)
                 #x0 = np.ones((dimension))
@@ -446,8 +439,6 @@ class MCTS():
             else:
                 print(f"unknown op type: {type(op)}")
                 print(op)
-
-        #print(expr, nt)
 
         if nt != []:
             return None, productions

@@ -756,9 +756,16 @@ class Trainer(object):
             for seq_l in range(len(x_to_fit[seq_id])):
                 x1[seq_id].append([x_to_fit[seq_id][seq_l], y_to_fit[seq_id][seq_l]])
 
+        # here we made a confusion
+        # when use_hints == "units" only, it mean we do not require any hints
+        # we denote this cause we require units after process
         hints = []
-        for used_hints in params.use_hints.split(","):
-            hints.append(samples[used_hints])
+        if params.use_hints:
+            for used_hints in params.use_hints.split(","):
+                hints.append(samples[used_hints])
+        if params.use_hints == "units":
+            for ii in range(len(hints[0])):
+                hints[0][ii] = []
 
         x1, len1 = embedder(x1, hints)
 

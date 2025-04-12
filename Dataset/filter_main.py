@@ -1,5 +1,7 @@
-#given generated datasets(exprs)
-#preprocess to dismiss those ilegal
+# filter_main.py
+# given generated datasets(exprs)
+# preprocess to dismiss those ilegal formulas
+# i.e. with ilegal variables / incorrect physics units
 
 import json
 import sympy as sp
@@ -271,17 +273,16 @@ if __name__ == "__main__":
     generator = env.generator
 
     context0 = []
-    with open("/home/linhw/yingjie/data/generated_results_v3.jsonl", "r") as fi:
+    with open("./data/generated_results_v0.jsonl", "r") as fi:
         for line in fi:
             expr = json.loads(line)["pred"]
             context0.append(expr)
-    with open("/home/linhw/yingjie/data/generated_results_v4.jsonl", "r") as fi:
+    with open("./data/generated_results_v1.jsonl", "r") as fi:
         for line in fi:
             expr = json.loads(line)["pred"]
             context0.append(expr)
     
     #context0 = context0[:1000]
-
 
     print("total expressions to be preprocess:")
     print(len(context0))

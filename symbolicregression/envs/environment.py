@@ -146,19 +146,6 @@ class FunctionEnvironment(object):
         """
         assert decode_physical_units in [None, "single-seq", "double-seq"]
 
-        """if decode_physical_units == "single-seq":
-            def merge_seq(seq1, seq2):
-                #seq1 is operator, seq2 is physical units
-                seq2_transposed = list(map(list, zip(*seq2)))
-                merged_seq = [
-                    item for sublist in zip(seq1, *seq2_transposed) for item in sublist
-                ]
-                return merged_seq
-            equations = [
-                merge_seq(eq, un)
-                for eq, un in zip(equations, units)
-            ]"""
-
         lengths = torch.LongTensor([2 + len(eq) for eq in equations])
         sent = torch.LongTensor(lengths.max().item(), lengths.size(0)).fill_(
             self.float_word2id["<PAD>"]
@@ -455,7 +442,6 @@ class FunctionEnvironment(object):
             zero_units = False
             units = None
 
-
         #complexity
         if "complexity" in use_hints:
             if params.sample_complexity_hints == None:
@@ -510,7 +496,6 @@ class FunctionEnvironment(object):
         else:
             unary_ops = None
 
-        
         #add/mul structure
         if "add_structure" in use_hints or "mul_structure" in use_hints:
             if params.sample_structure_hints == None:
@@ -531,7 +516,6 @@ class FunctionEnvironment(object):
         else:
             add_structure = None
             mul_structure = None
-
 
         #consts
         if "consts" in use_hints:
@@ -556,7 +540,7 @@ class FunctionEnvironment(object):
                         all_nodes += temp.children
                         pt += 1
 
-                    #ignore pi and integers
+                    # ignore pi and integers
                     const_nodes = []
                     for node in all_nodes:
                         try:
@@ -574,7 +558,6 @@ class FunctionEnvironment(object):
                     ]
             
             else:
-
                 const = params.sample_const_hints
                 if const == "": const = []
                 else:
@@ -646,8 +629,6 @@ class FunctionEnvironment(object):
             "original_expr": original_expr,
             "infos": info,
 
-            # we also need some hints like dimension, complexity, 
-            # used unary, add/mul structure, used_const
             "units": units,
             "complexity": complexity,
             "unarys": unary_ops,

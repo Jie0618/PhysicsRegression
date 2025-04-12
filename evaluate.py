@@ -1,22 +1,16 @@
 import copy
 import json
-from logging import getLogger
 from collections import OrderedDict, defaultdict
 import os
-import torch
 import numpy as np
 from copy import deepcopy
 from tqdm import tqdm
 import time
+import pandas as pd
 
-from parsers import get_parser
-import symbolicregression
 from symbolicregression.model.sklearn_wrapper import SymbolicTransformerRegressor
 from symbolicregression.model.model_wrapper import ModelWrapper
-from symbolicregression.metrics import compute_metrics
-import symbolicregression.model.utils_wrapper as utils_wrapper
-from symbolicregression.metrics_sym import cal_sym_acc
-import pandas as pd
+from symbolicregression.metrics import compute_metrics, cal_sym_acc
 
 from Oracle.oracle import Oracle
 from symbolicregression.MCTS.mcts import MCTS
@@ -193,13 +187,14 @@ class Evaluator(object):
             #only units are avaliable, complexity are unknown, and ignore others
             #consts will be provided with oracles
             hints = []
-            for used_hints in params.use_hints.split(","):
-                if used_hints == "units":
-                    hints.append(samples[used_hints])
-                elif used_hints == "complexity":
-                    hints.append([[0] for _ in range(len(samples[used_hints]))])
-                else:
-                    hints.append([[] for _ in range(len(samples[used_hints]))])
+            if params.use_hints:
+                for used_hints in params.use_hints.split(","):
+                    if used_hints == "units":
+                        hints.append(samples[used_hints])
+                    elif used_hints == "complexity":
+                        hints.append([[0] for _ in range(len(samples[used_hints]))])
+                    else:
+                        hints.append([[] for _ in range(len(samples[used_hints]))])
 
             dstr.fit(
                 x_to_fit, y_to_fit, hints, 
@@ -228,19 +223,6 @@ class Evaluator(object):
             predicted_tree = [best_gen["predicted_tree"] for best_gen in best_gens]
             batch_results["predicted_tree"].extend([str(_tree) for _tree in predicted_tree])
             batch_results["tree"].extend([str(_tree) for _tree in tree])
-
-            #perplexity
-            #perplexity = [best_gen["perplexity"] for best_gen in best_gens]
-            #batch_results["word_perplexity"].extend([p[0] if p is not None else np.NaN for p in perplexity])
-            #batch_results["dimension_perplexity"].extend([p[1] if p is not None else np.NaN for p in perplexity])
-
-            #info
-            #for best_gen in best_gens:
-            #    for info, val in best_gen.items():
-            #        batch_results[info].extend([val])
-
-            #for k, v in infos.items():
-            #    batch_results["info_" + k].extend(v)
 
             y_tilde_to_fit = dstr.predict(
                 x_to_fit, refinement_type="BFGS", batch=True
@@ -833,7 +815,7 @@ class Evaluator(object):
                 for b in [
                     "fit", "predict_1.0", "predict_2.0", "predict_4.0", "predict_8.0", "predict_16.0"
                 ]
-            ] + ["_complexity_fit", "units_pred", "elapsed_time"]
+            ] + ["_complexity_fit", "units_pred", "elapsed_time", "sym_acc"]
             for k in print_columns:
                 v = df_current[k].mean()
                 scores[k] = v

@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import random_split, DataLoader, TensorDataset, Subset
+from torch.utils.data import random_split, DataLoader, TensorDataset
 from torch.autograd.functional import hessian
 import tqdm
 import matplotlib.pyplot as plt
@@ -15,8 +15,6 @@ from multiprocessing import Process
 import math
 import re
 
-import sys
-sys.path.append("/home/linhw/yingjie/symbolicregression_v7/")
 from symbolicregression.model import utils_wrapper
 from symbolicregression.metrics import compute_metrics
 from symbolicregression.envs.generators import Node
@@ -59,7 +57,6 @@ class Oracle():
         self.minimum_sep_cutoff_coeff = minimum_sep_cutoff_coeff
         self.maximum_sep_cutoff_coeff = maximum_sep_cutoff_coeff
 
-        #TODO:not implement yet
         self.use_merge_inference = use_merge_inference
         self.use_cache_sep = use_cache_sep
 
@@ -153,11 +150,8 @@ class Oracle():
             print(e, "norm computation error")
             return 
 
-        #to prevent overlarge numbers
-        if use_maxi_y:
-            maxi_y = np.max(np.abs(ys))
-        else:
-            maxi_y = np.array([1])
+        if use_maxi_y: maxi_y = np.max(np.abs(ys))
+        else: maxi_y = np.array([1])
         ys /= maxi_y
 
         return xs, ys, maxi_y, median_y
@@ -182,19 +176,12 @@ class Oracle():
             X = x
             Y = y
 
-        # construct dataloader
         dataset = TensorDataset(X, Y) 
-        #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-        # 计算长度
         num_samples = len(dataset)
-
-        # 按比例划分训练集和验证集
         train_size = int(num_samples * (1 - test_rate))
         test_size = num_samples - train_size
         train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
-        # 构建训练集和验证集的 DataLoader
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         if test_rate > 0: 
             test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
@@ -238,7 +225,6 @@ class Oracle():
                     mses.append(mse)
                 if tqdm_bar:pbar.update(1)
             lr /= 5
-        #print(mses)
 
         if plot:
             plt.plot(mses)
@@ -276,15 +262,6 @@ class Oracle():
         if median_y is None:
             median_y = 1e8
 
-        #fixed_x = np.random.uniform(1, 2, (100, num_variables))
-        #tar_y = val_fn(fixed_x).reshape((-1, 1))
-        #idx_nan = np.isnan(tar_y)
-        #tar_y = tar_y[~idx_nan]
-        #fixed_x = fixed_x[~idx_nan]
-        #sorted_indices = np.argsort(np.abs(tar_y))
-        #median_index = sorted_indices[len(tar_y)//2]
-        #fixed_x = fixed_x[median_index]
-            
         while trials < max_trials:
             if fixed_x_range is not None:
                 fixed_x = np.random.uniform(fixed_x_range[0], fixed_x_range[1], (100, num_variables))
@@ -388,14 +365,6 @@ class Oracle():
                     hs_pow2_log_pred = hs_log_pred.clone()
                 else:
                     assert False
-                    hs_log_pred = torch.zeros(0, num_variables, num_variables)
-                    for h, g, f in zip(hs_pred, gs_pred, fs_pred):
-                        g = g.reshape((-1, 1))
-                        h_log_1 = - 1 / f ** 2 * g * g.T + 1 / f * h
-                        h_log_2 = - g * g.T + f * h
-                        h_log = 2 * torch.where(torch.abs(h_log_1) < torch.abs(h_log_2), h_log_1, h_log_2).unsqueeze(0)
-                        #h_log = h_log_1.unsqueeze(0)
-                        hs_log_pred = torch.cat((hs_log_pred, h_log), dim=0)
 
                 res.append(torch.median(torch.abs(hs_pow2_log_pred), dim=0)[0])
 
@@ -628,8 +597,7 @@ class Oracle():
 
                 new_x = x[:params.max_input_points, idx_to_choose].copy()
 
-                # TODO:here we select top 200 xy-datapoint
-                # which get rids of the outliers
+                # here we select top 200 xy-datapoint which get rids of the outliers
                 outlier_idx = (np.abs(new_y) > 8 * min(median_y, 1e7)).reshape((-1))
                 new_new_x = new_x[~outlier_idx][:params.max_input_points*max(1, params.max_number_bags)]
                 new_new_y = new_y[~outlier_idx][:params.max_input_points*max(1, params.max_number_bags)]
@@ -778,27 +746,8 @@ class Oracle():
 
         if use_parallel and False:
 
-            parallel_num = 1
-
-            for i in range((self.expr_num - 1) // parallel_num + 1):
-
-                processes = []
-                for j in range(i*parallel_num, min(self.expr_num, (i+1)*parallel_num)):
-                    x = xs[j]
-                    y = ys[j]
-                    expr_idx = expr_idxs[j]
-
-                    filename = f"/home/linhw/yingjie/symbolicregression_v7/Oracle_model/{name}_{expr_idx}.pth"
-                    if not os.path.exists(filename):
-                        maxi_y = np.max(np.abs(y))
-                        normed_y = y / maxi_y
-
-                        p = Process(target=self.train_and_save, args=(x, normed_y, maxi_y, filename))
-                        p.start()
-                        processes.append(p)
-                
-                for p in processes:
-                    p.join()             
+            # TODO: parallel mode for oracle training      
+            pass
 
         if verbose:
             tqdm_bar = tqdm.tqdm(total=self.expr_num)
@@ -1040,8 +989,6 @@ class Oracle():
                 refined_nodes.append(refined_node)
 
             elif safely_type == "inv":
-                
-                #???
                 safely_y = 1 / deepcopy(y)
                 safely_node = deepcopy(node_to_refine)
                 root = Node("inv", self.params, children=[safely_node])
@@ -1205,7 +1152,6 @@ class Oracle():
             
             current_expr = []
             
-            
             for comb in combinations(range(len(expr_str)), k):
 
                 current_group = [groups[_comb] for _comb in comb]
@@ -1246,9 +1192,7 @@ class Oracle():
                 except:
                     message = traceback.format_exc()
                     pass
-                #TODO:seems we fix this bug! no Re and Im anymore!
                 current_expr = f"*({current_expr}) ** ({(-1)**(k-1)}/{k})"
-                #current_expr = f"*(Abs({current_expr})) ** ({(-1)**(k-1)}/{k})"
             else:
                 raise ValueError()
             
@@ -1376,15 +1320,8 @@ class Oracle():
                 metric="_mse"
             )
 
-            """ordered_exprs = [
-                e for e in ordered_exprs
-                if "id,mul" in e["message"]
-                and e["message"].count("|") == 2
-            ]"""
-
             res_exprs.append(ordered_exprs[0])
             
-
             # reduce original and oracle expr
             if eliminate:
                 original_and_oracle = copy.deepcopy(res_exprs[-2:])
@@ -1525,328 +1462,3 @@ class Oracle():
             res.append(current_res)
             
         return res
-
-    
-                            
-
-
-#abandom
-def train_oracle(xy,
-                 epochs=500,
-                 batch_size=2048,
-                 lr=0.01,
-                 test_rate=0,
-                 test_freq=-1,
-                 N_reg_lr=4,
-                 plot=False,
-                 device="cpu",
-                 tqdm_bar=True):
-    (x, y) = xy
-
-    if isinstance(x, np.ndarray):
-        X = torch.from_numpy(x).float()
-        Y = torch.from_numpy(y).float()
-    else:
-        X = x
-        Y = y
-
-    # construct dataloader
-    dataset = TensorDataset(X, Y) 
-    #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-    # 计算长度
-    num_samples = len(dataset)
-
-    # 按比例划分训练集和验证集
-    train_size = int(num_samples * (1 - test_rate))
-    test_size = num_samples - train_size
-    #train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-    train_dataset = Subset(dataset, range(train_size))
-    test_dataset = Subset(dataset, range(train_size, num_samples))
-
-    # 构建训练集和验证集的 DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    if test_rate > 0: 
-        test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
-
-    model = SimpleNet(x.shape[1]).to(device)
-
-    def loss_fn(pred, targ):
-        denom = targ**2
-        denom = torch.sqrt(denom.sum()/len(denom))
-        return torch.sqrt(torch.nn.functional.mse_loss(pred, targ))/denom
-
-    #def loss_fn(pred, targ):
-    #    return torch.sqrt(torch.nn.functional.mse_loss(pred, targ))
-
-    mses_train = []
-    mses_test = []
-    pbar = tqdm.tqdm(total=N_reg_lr*epochs) if tqdm_bar else None
-    mse = 1
-    for i in range(N_reg_lr):
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        for epoch in range(1, epochs + 1):
-            model.train()
-            mse_train = 0
-            cnt = 0
-            for x_batch, y_batch in train_loader:
-                x_batch = x_batch.to(device)
-                y_batch = y_batch.to(device)
-                optimizer.zero_grad()
-                pred = model(x_batch)
-                loss = loss_fn(pred, y_batch)
-                loss.backward()
-                optimizer.step()
-                mse_train += loss.detach().cpu().clone().numpy()
-                cnt += 1
-            mses_train.append(mse_train/cnt)
-
-            if test_freq > 0 and epoch % test_freq == 0:
-                mse = 0
-                model.eval()
-                with torch.no_grad():
-                    for x_batch, y_batch in test_loader:
-                        x_batch = x_batch.to(device)
-                        y_batch = y_batch.to(device)
-                        pred = model(x_batch)
-                        loss = loss_fn(pred, y_batch)
-                        mse += loss.cpu().detach().numpy()
-                        #for i in range(pred.shape[0]):
-                        #    print(pred[i], y_batch[i])
-                mses_test.append(mse)
-            if tqdm_bar:
-                pbar.update(1)
-                pbar.set_description("Loss: {:.4f}".format(mse))
-                
-        lr /= 5
-    #print(mses)
-
-    if plot:
-        plt.plot(mses_test)
-        plt.show()
-        plt.show(mses_train)
-        plt.show()
-
-    #eval
-    model.eval()
-    mse = 0
-    with torch.no_grad():
-        for x_batch, y_batch in test_loader:
-            x_batch = x_batch.to(device)
-            y_batch = y_batch.to(device)
-            pred = model(x_batch)
-            loss = loss_fn(pred, y_batch)
-            mse += loss.cpu().detach().numpy()
-    
-    model.to("cpu")
-    return model, mse
-
-def train_multi_oracle(
-                    xy,
-                    oracle_nums,
-                    oracle_dimension,
-                    oracle_variables,
-                    epochs=500,
-                    batch_size=2048,
-                    lr=0.005,
-                    test_rate=0,
-                    test_freq=-1,
-                    N_reg_lr=4,
-                    plot=False,
-                    device="cpu"):
-    assert oracle_nums == len(oracle_dimension) == len(oracle_variables)
-    assert all([len(oracle_variables[i]) == oracle_dimension[i] for i in range(oracle_nums)])
-
-    (x, y) = xy
-
-    if isinstance(x, np.ndarray):
-        X = torch.from_numpy(x).float()
-        Y = torch.from_numpy(y).float()
-    else:
-        X = x
-        Y = y
-
-    new_X = X.new(size=(X.shape[0], sum(oracle_dimension)))
-
-    current_pos = 0
-    for idx in oracle_variables:
-        new_X[:, current_pos:current_pos+len(idx)] = X[:, idx]
-        current_pos += len(idx)
-
-    # construct dataloader
-    dataset = TensorDataset(new_X, Y) 
-    #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-    # 计算长度
-    num_samples = len(dataset)
-
-    # 按比例划分训练集和验证集
-    train_size = int(num_samples * (1 - test_rate))
-    test_size = num_samples - train_size
-    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-
-    # 构建训练集和验证集的 DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    if test_rate > 0: 
-        test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
-
-    models = [
-        SimpleNet(oracle_dimension[i]).to(device) for i in range(oracle_nums)
-    ]
-
-    def loss_fn(pred, targ):
-        denom = targ**2
-        denom = torch.sqrt(denom.sum()/len(denom))
-        return torch.sqrt(torch.nn.functional.mse_loss(pred, targ))/denom
-    
-    mses = []
-    with tqdm.tqdm(total=N_reg_lr*epochs) as pbar:
-        for i in range(N_reg_lr):
-            parameters = [
-                p for model in models for p in model.parameters()
-            ]
-            optimizer = torch.optim.Adam(parameters, lr=lr)
-            for epoch in range(1, epochs + 1):
-                for model in models:
-                    model.train()
-                for x_batch, y_batch in train_loader:
-                    optimizer.zero_grad()
-                    x_batch = x_batch.to(device)
-                    y_batch = y_batch.to(device)
-
-                    current_pos = 0
-                    preds = y_batch.new(y_batch.shape)
-                    preds.fill_(0)
-                    for i in range(oracle_nums):
-                        pred = models[i](x_batch[:, current_pos:current_pos+oracle_dimension[i]])
-                        preds = preds + pred
-                        current_pos += oracle_dimension[i]
-
-                    loss = loss_fn(preds, y_batch)
-                    loss.backward()
-                    optimizer.step()
-                
-                if test_freq > 0 and epoch % test_freq == 0:
-                    for model in models:
-                        model.eval()
-                    mse = 0
-                    with torch.no_grad():
-                        for x_batch, y_batch in test_loader:
-                            x_batch = x_batch.to(device)
-                            y_batch = y_batch.to(device)
-                            current_pos = 0
-                            preds = y_batch.new(y_batch.shape)
-                            for i in range(oracle_nums):
-                                pred = models[i](x_batch[:, current_pos:current_pos+oracle_dimension[i]])
-                                preds = preds + pred
-                                current_pos += oracle_dimension[i]
-                            loss = loss_fn(preds, y_batch)
-                            mse += loss.detach().cpu().numpy()
-                    mses.append(mse)
-                pbar.update(1)
-            lr /= 5
-    #print(mses)
-
-    if plot:
-        plt.plot(mses)
-        plt.show()
-    
-    return models
-
-
-
-if __name__ == '__main__':
-
-    ########## test for fit ##########
-    
-    #tes1
-    """def f(x):
-        return x[:,0]*x[:,1] + x[:,2]*x[:,3] + x[:,4]*x[:,5]
-
-    x = np.random.randn(80000,6)
-
-    y = f(x) + np.random.normal(0, 0.0, (x.shape[0],))
-    y = y.reshape((-1,1))
-
-    oracle = Oracle()
-    oracle.oracle_fit(x, y, 0)"""
-
-    
-
-    ########## test for reverse ##########
-
-    #test1
-    """oracle = Oracle()
-    oracle.expr_num = 1
-    oracle.oracle_expr_idx = [0, 0, 0]
-    oracle.oracle_consts = [np.array([1.1, 0.4])]
-    oracle.oracle_groups = [[np.array([0]), np.array([1])]]
-    oracle.oracle_types = ["add"]
-    exprs = ["x_0+x_1", "x_0+0.411", "1.099 + x_1"]
-    res1, res2 = oracle.reverse(exprs)
-    print(res1[0], res2[0])
-    print(sp.parse_expr(res2[0]))"""
-
-    #test2
-    """oracle = Oracle()
-    oracle.expr_num = 1
-    oracle.oracle_expr_idx = [0, 0, 0, 0]
-    oracle.oracle_consts = [np.array([1.1, 1.2, 1.3, -1.4, -1.5])]
-    oracle.oracle_groups = [[np.array([0, 1, 2]), np.array([2, 3, 4]), np.array([0, 4])]]
-    oracle.oracle_types = ["add"]
-    exprs = ["x_0+x_1+x_2+x_3+x_4", "x_0+x_1+x_2-2.99", "x_2+x_3+x_4+2.33", "x_0+x_4+0.99"]
-    res = oracle.reverse(exprs)
-    res1, res2 = oracle.reverse(exprs)
-    print(res1[0], res2[0])
-    print(sp.parse_expr(res2[0]))"""
-
-    #test3
-    """oracle = Oracle()
-    oracle.expr_num = 1
-    oracle.oracle_expr_idx = [0, 0, 0, 0, 0]
-    oracle.oracle_consts = [np.array([1.1, 1.2, 1.3, 0.2])]
-    oracle.oracle_groups = [[np.array([0]), np.array([1]), np.array([2]), np.array([3])]]
-    oracle.oracle_types = ["mul"]
-    exprs = ["x_0*x_1*x_2/x_3**2", "39.123*x_0", "36*x_1", "32.765*x_2", "1.71/x_3**2"]
-    res = oracle.reverse(exprs)
-    res1, res2 = oracle.reverse(exprs)
-    print(res1[0], res2[0])
-    print(sp.parse_expr(res2[0]))"""
-
-    #test4
-    """oracle = Oracle()
-    oracle.expr_num = 1
-    oracle.oracle_expr_idx = [0, 0, 0]
-    oracle.oracle_consts = [np.array([1.1, 1.2, 1.3, 0.2])]
-    oracle.oracle_groups = [[np.array([0, 1, 2]), np.array([2, 3])]]
-    oracle.oracle_types = ["mul"]
-    exprs = ["x_0*x_1*x_2/x_3**2", "25.3*x_0*x_1*x_2", "1.38*x_2/x_3**2"]
-    res = oracle.reverse(exprs)
-    res1, res2 = oracle.reverse(exprs)
-    print(res1[0], res2[0])
-    print(sp.parse_expr(res2[0]))"""
-
-    #test5
-    """oracle = Oracle()
-    oracle.expr_num = 2
-    oracle.oracle_expr_idx = [0, 0, 0, 1, 1, 1, 1, 1]
-    oracle.oracle_consts = [
-        np.array([1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7]),
-        np.array([1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7]),
-    ]
-    oracle.oracle_groups = [
-        [np.array([0, 1, 2, 3]), np.array([0, 2, 3, 4, 5, 6, 7])],
-        [np.array([0]), np.array([2]), np.array([3]), np.array([1, 4, 5, 6, 7])]
-    ]
-    oracle.oracle_types = ["add", "mul"]
-    exprs = [
-        "x_0*x_1/(x_2*x_3) + x_0*x_4*x_5/(x_6*x_7**2*x_2*x_3)", "x_0*x_1/(x_2*x_3) + 0.454*x_0/(x_2*x_3)", "x_0*x_4*x_5/(x_6*x_7**2*x_2*x_3) + 1.1*x_0/(x_2*x_3)",
-        "x_0*x_1/(x_2*x_3) + x_0*x_4*x_5/(x_6*x_7**2*x_2*x_3)", "x_0*1.1", "x_2*1.2", "x_3*1.4", "1.1*(x_1 + x_4*x_5/(x_6*x_7**2))"
-    ]
-    res = oracle.reverse(exprs)
-    res1, res2 = oracle.reverse(exprs)
-    print(res1[0], res2[0])
-    print(sp.parse_expr(res2[0]))
-    print()
-    print(res1[1], res2[1])
-    print(sp.parse_expr(res2[1]))"""

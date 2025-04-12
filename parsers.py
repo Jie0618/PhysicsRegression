@@ -608,7 +608,7 @@ def get_parser():
     parser.add_argument(
         "--decode_physical_units",
         type=str,
-        default="single-seq",
+        default=None,
         help="how to decode output physical units. (None, single-seq, double-seq)"
     )
     parser.add_argument(

@@ -16,7 +16,7 @@ python ./train.py \
         --max_input_points 300 \
         --tokens_per_batch 20000 \
         --add_consts 1 \
-        --device "cuda:3" \
+        --device "cuda:0" \
         --use_exprs 200000 \
         --use_dimension_mask 0 \
         --expr_train_data_path "./data/exprs_train.json" \
