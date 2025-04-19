@@ -5,20 +5,12 @@ import copy
 import json
 import torch
 import numpy as np
-import pandas as pd
-from tqdm import tqdm
-from logging import getLogger
-from collections import OrderedDict, defaultdict
-from copy import deepcopy
-import scipy
-import pickle
-import time
 
 from parsers import get_parser
 import symbolicregression
 from symbolicregression.slurm import init_signal_handler, init_distributed_mode
 from symbolicregression.utils import initialize_exp
-from symbolicregression.model import check_model_params, build_modules
+from symbolicregression.model import build_modules
 from symbolicregression.envs import build_env
 from symbolicregression.trainer import Trainer
 from evaluate import Evaluator
