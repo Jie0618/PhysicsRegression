@@ -4,9 +4,12 @@ import sympy as sp
 import torch
 import os
 import re
+import tqdm
 from sklearn.metrics import r2_score
 from scipy.optimize import minimize
 
+from parsers import get_parser
+import symbolicregression
 from symbolicregression.envs import build_env
 from symbolicregression.model import build_modules
 from symbolicregression.model.sklearn_wrapper import SymbolicTransformerRegressor
@@ -430,7 +433,7 @@ class PhyReg():
             self.best_gens = best_gens
             if verbose:
                 self.express_best_gens(best_gens)
-
+        
         self.best_gens_noref = best_gens_noref
         self.best_gens_bfgs = best_gens_bfgs
             
@@ -661,7 +664,90 @@ class PhyReg():
                 self.express_best_gens(best_gens_refined)
             self.best_gens_refined = best_gens_refined
 
-    def constant_optimization(self, best_gens, x, y, sigma=1):
+    def genetic_programming(self, best_gens, x, y, use_pysr_init=False, verbose=False):
+
+        best_gens_gp = copy.deepcopy(best_gens)
+
+        gp_exprs = [
+            e["predicted_tree"] for e in best_gens
+        ]
+        for i in range(len(gp_exprs)):
+            gp_exprs[i] = str(gp_exprs[i])
+            for k,v in {
+                "add": "+", "mul": "*", "sub": "-", "pow": "**", "inv": "1/", "neg": "-"
+            }.items():
+                gp_exprs[i] = gp_exprs[i].replace(k, v)
+            if "nan" in gp_exprs[i] or "None" in gp_exprs[i]:
+                gp_exprs[i] = "0"
+        gp_exprs = [
+            [gp_exprs[i]] for i in range(len(gp_exprs))
+        ]
+
+
+        for i, (best_gen_gp, gp_expr) in enumerate(zip(best_gens_gp, gp_exprs)):
+
+            num_variables = (x[i].shape)[1]
+
+            if best_gen_gp["_mse"] < 1e-8:
+                continue
+            
+            if use_pysr_init:
+
+                # pysr warm up
+                from pysr import PySRRegressor
+                warnings.filterwarnings("ignore", message="`torch` was loaded before the Julia instance started.*")
+                warnings.filterwarnings("ignore", message="Your system's Python library is static (e.g., conda)*")
+                pysr = PySRRegressor(
+                    model_selection="best",  # Result is mix of simplicity+accuracy
+                    niterations=40,
+                    binary_operators=["*", "+", "-", "/"],
+                    unary_operators=["square", "cube", "exp", "log", "sin", "cos", "tan", "sqrt"],
+                    extra_sympy_mappings={"inv": lambda x: 1 / x},
+                    loss="loss(x, y) = (x - y)^2",
+                    verbosity=verbose
+                )
+                pysr.fit(x[i], y[i])
+                expr_str = str(pysr.sympy())
+                transition_dic = {
+                    f"x{j}": f"x_{j}" for j in range(num_variables)
+                }
+                for k,v in transition_dic.items():
+                    expr_str = expr_str.replace(k, v)
+                gp_expr = gp_expr + [expr_str]
+
+                # clear 
+                cnt = 0
+                for root, _, files in os.walk(os.getcwd()):
+                    for file_name in files:
+                        if file_name.startswith('hall_of_fame'):
+                            file_path = os.path.join(root, file_name)
+                            try:
+                                os.remove(file_path)
+                                cnt += 1
+                                #print(f"Deleted: {file_path}")
+                            except OSError as e:
+                                print(f"Error deleting {file_path}: {e}")
+                #print(f"total remove {cnt} files")
+            
+            # mixture-heuristic gp search
+            assert num_variables == (x[i].shape)[1], f"{num_variables}, {(x[i].shape)[1]}"
+            treeGenerator = TreeGenerator(self.params)
+            gp = GeneticProgramming(treeGenerator, self.params, self.oracle, max_attemp=5,)
+            best_of_all = gp.run(
+                self.env, num_variables, 
+                (x[i], y[i]), exprs=gp_expr, 
+                verbose=verbose
+            )
+            #print(best_of_all)
+            #print(best_of_all.best(), type(best_of_all.best()))
+            #print()
+
+            node = best_of_all.best()
+            best_gen_gp["predicted_tree"] = node
+
+        return best_gen_gp
+
+    def constant_optimization(self, best_gens, x, y, sigma=1, use_tqdm=False):
 
         best_gens_refined = copy.deepcopy(best_gens)
 
@@ -681,6 +767,8 @@ class PhyReg():
                 expr = expr.replace(c, f"c_{t}", 1)
             consts = np.array(list(map(float, consts)))
 
+            if use_tqdm: pbar = tqdm.tqdm(total=self.params.num_bfgs)
+
             for trial in range(self.params.num_bfgs):
                 
                 new_consts = copy.deepcopy(consts)
@@ -699,6 +787,10 @@ class PhyReg():
                 if mse < best_mse:
                     best_mse = mse
                     best_expr = new_expr
+                
+                if use_tqdm: pbar.update(1)
+
+            if use_tqdm: pbar.close()
 
             best_gens_refined[i]["predicted_tree"] = best_expr
             best_gens_refined[i]["_mse"] = best_mse

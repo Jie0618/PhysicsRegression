@@ -303,6 +303,7 @@ class GeneticProgramming():
         self.eps = params.eps
         self.optimize_probability = params.optimize_probability
         self.parsimony = params.parsimony
+        ### TODO
         self.use_recorder = params.use_recorder
 
         self.mutate_weight = np.array([0.048, 0.47, 0.79, 5.1, 1.7, 0.0020, 0.00023, 0.21])
@@ -1140,7 +1141,7 @@ class GeneticProgramming():
 
             t2 = time.time()
 
-            self.timerecorder.record("copy", t2-t1)
+            #self.timerecorder.record("copy", t2-t1)
 
             if i == 0:
                 #mutate const
@@ -1148,13 +1149,13 @@ class GeneticProgramming():
                 self.mutate_const(new_E, T)
                 satisfy_constrain = True
                 t2 = time.time()
-                self.timerecorder.record("mutate const", t2-t1)
+                #self.timerecorder.record("mutate const", t2-t1)
             elif i == 1:
                 #mutate operator
                 t1 = time.time()
                 self.mutate_operator(new_E)
                 t2 = time.time()
-                self.timerecorder.record("mutate op", t2-t1)
+                #self.timerecorder.record("mutate op", t2-t1)
             elif i == 2:
                 #append/prepend node
                 t1 = time.time()
@@ -1163,27 +1164,27 @@ class GeneticProgramming():
                 else:
                     self.append_random_op_PySR(new_E, num_variables)
                 t2 = time.time()
-                self.timerecorder.record("append prepend", t2-t1)
+                #self.timerecorder.record("append prepend", t2-t1)
             elif i == 3:
                 #insert node
                 t1 = time.time()
                 self.insert_random_op(new_E, num_variables)
                 t2 = time.time()
-                self.timerecorder.record("insert node", t2-t1)
+                #self.timerecorder.record("insert node", t2-t1)
             elif i == 4:
                 #delete node
                 t1 = time.time()
                 self.delete_random_node_PySR(new_E, num_variables)
                 satisfy_constrain = True
                 t2 = time.time()
-                self.timerecorder.record("delete node", t2-t1)
+                #self.timerecorder.record("delete node", t2-t1)
             elif i == 5:
                 #simplify
                 t1 = time.time()
                 self.simplify_tree(new_E)
                 satisfy_constrain = True
                 t2 = time.time()
-                self.timerecorder.record("simplify", t2-t1)
+                #self.timerecorder.record("simplify", t2-t1)
             elif i == 6:
                 #random
                 #tree_size_to_generate = np.random.randint(1, self.max_complexity)
@@ -1191,7 +1192,7 @@ class GeneticProgramming():
                 tree_size_to_generate = 3
                 self.generate_random_tree_fixed_size_PySR(new_E, tree_size_to_generate, num_variables)
                 t2 = time.time()
-                self.timerecorder.record("ramdon gen", t2-t1)
+                #self.timerecorder.record("ramdon gen", t2-t1)
             elif i == 7:
                 #do nothing
                 return E, "passss"
@@ -1201,12 +1202,12 @@ class GeneticProgramming():
             satisfy_constrain = satisfy_constrain or self.check_constrain(new_E)
             attemp += 1
             t2 = time.time()
-            self.timerecorder.record("check_constrain", t2-t1)
+            #self.timerecorder.record("check_constrain", t2-t1)
 
         t1 = time.time()
         new_E.update()
         t2 = time.time()
-        self.timerecorder.record("cal loss", t2-t1)
+        #self.timerecorder.record("cal loss", t2-t1)
 
         ops = ["mut_ct", "mut_op", "append", "insert", "delete", "simpfy", "random", "passss"]
 
@@ -1274,12 +1275,12 @@ class GeneticProgramming():
                 t1 = time.time()
                 new_individual, op = self.mutation(individual, T, num_variables, baseline, frecency)
                 t2 = time.time()
-                self.timerecorder.record("mutate", t2-t1)
+                #self.timerecorder.record("mutate", t2-t1)
 
                 #replace the oldest
                 if new_individual is not None:
                     population.replace_oldest(new_individual)
-                    self.datarecorder.record_mutation(op, individual, new_individual)
+                    #self.datarecorder.record_mutation(op, individual, new_individual)
 
             else:
                 #crossover
@@ -1288,28 +1289,28 @@ class GeneticProgramming():
                 t1 = time.time()
                 new_individual1, new_individual2 = self.cross_over(individual1, individual2)
                 t2 = time.time()
-                self.timerecorder.record("crossover", t2-t1)
+                #self.timerecorder.record("crossover", t2-t1)
             
                 #replace the oldest
                 if new_individual1 is not None:
                     population.replace_oldest(new_individual1)
                     population.replace_oldest(new_individual2)
-                    self.datarecorder.record_cross(individual1, individual2, new_individual1, new_individual2)
+                    #self.datarecorder.record_cross(individual1, individual2, new_individual1, new_individual2)
 
 
     def optimize_and_simplify_population(self, population, xy):
         rand = np.random.random(size=(len(population)))
         for i, individual in enumerate(population):
 
-            self.datarecorder.record_simplify(individual, "before")
+            #self.datarecorder.record_simplify(individual, "before")
             t1 = time.time()
 
             self.simplify_tree(individual)
 
             t2 = time.time()
 
-            self.timerecorder.record("simplify", t2-t1)
-            self.datarecorder.record_simplify(individual, "after")
+            #self.timerecorder.record("simplify", t2-t1)
+            #self.datarecorder.record_simplify(individual, "after")
 
             individual._update_len()
             individual._update_complexity()
@@ -1318,25 +1319,21 @@ class GeneticProgramming():
 
             #optimize with probability
             if rand[i] < self.optimize_probability:
-                self.datarecorder.record_optimize(individual, "before")
+                #self.datarecorder.record_optimize(individual, "before")
                 individual.node = bfgs_gp(individual.node, xy, self.oracle)
                 individual._update_loss()
-                self.datarecorder.record_optimize(individual, "after")
+                #self.datarecorder.record_optimize(individual, "after")
 
                 t4 = time.time()
 
-                self.timerecorder.record("optimize", t4-t3)
-
-                ###TODO:fix this!!!
-                self.datarecorder.record_simplify(individual, "before")
+                #self.timerecorder.record("optimize", t4-t3)
+                #self.datarecorder.record_simplify(individual, "before")
                 t1 = time.time()
-
                 self.simplify_tree(individual)
-
                 t2 = time.time()
 
-                self.timerecorder.record("simplify", t2-t1)
-                self.datarecorder.record_simplify(individual, "after")
+                #self.timerecorder.record("simplify", t2-t1)
+                #self.datarecorder.record_simplify(individual, "after")
 
                 individual._update_len()
                 individual._update_complexity()
@@ -1388,7 +1385,7 @@ class GeneticProgramming():
             j += 1
 
         t2 = time.time()
-        self.timerecorder.record("migration", t2-t1)
+        #self.timerecorder.record("migration", t2-t1)
         
 
     def run(self, env, num_variables, xy, exprs=None, verbose=1):
@@ -1407,8 +1404,8 @@ class GeneticProgramming():
         best_of_all = BestFrontier()
         best_of_population = [BestFrontier() for _ in range(self.population_num)]
 
-        self.timerecorder = TimeRecorder()
-        self.datarecorder = DataRecorder()
+        #self.timerecorder = TimeRecorder()
+        #self.datarecorder = DataRecorder()
 
         for epoch in range(self.epochs):
             
@@ -1416,13 +1413,13 @@ class GeneticProgramming():
                 print("epoch:{}...".format(epoch+1))
                 print()
 
-            self.datarecorder.new_epoch()
+            #self.datarecorder.new_epoch()
             
             for i in range(self.population_num):
 
                 population = populations[i]
 
-                self.datarecorder.new_population(population)
+                #self.datarecorder.new_population(population)
 
                 #aging
                 for individual in population:
