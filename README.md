@@ -4,7 +4,7 @@ This repository contains code for the paper [A Neural Symbolic Model for Space P
 
 If you encounter any problems with this program, please contact Jie Ying yingj24@mails.tsinghua.edu.cn.
 
-![OverallFramework](figs/framework.png)
+![OverallFramework](figs/frameworks.png)
 
 ## Installation
 
@@ -80,3 +80,14 @@ There are five Jupyter notebooks in the `physical` directory, each corresponding
 ## Lisence
 
 This project is covered under the Apache 2.0 License.
+
+## Citation
+
+```
+@article{ying2025neural,
+  title={A Neural Symbolic Model for Space Physics},
+  author={Ying, Jie and Lin, Haowei and Yue, Chao and Chen, Yajie and Xiao, Chao and Shi, Quanqi and Liang, Yitao and Yau, Shing-Tung and Zhou, Yuan and Ma, Jianzhu},
+  journal={arXiv preprint arXiv:2503.07994},
+  year={2025}
+}
+```
