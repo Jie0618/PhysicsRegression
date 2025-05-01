@@ -14,19 +14,11 @@ np.seterr(all='ignore')
 class TreeGenerator(): 
     def __init__(self,
                  params,
-                 N_max=200,
-                 k_max=10,
                  precision=4,
                  max_number=10**100,
                  ):
         """
         `params`: control some fixed params in the expression tree.
-
-        `b_max`: the maximum number of binary operator, default to be 5+D, deciding during generating
-
-        `N_max`: the maximum number of input-output pairs
-
-        `k_max`: the maximum number of the input cluster
 
         `precision`: the precision of each coefficient
 
@@ -35,8 +27,6 @@ class TreeGenerator():
         self.params = params
         self.D_max = params.D_max
         self.u_max = params.u_max
-        self.N_max = N_max
-        self.k_max = k_max
         self.precision = precision
         self.max_number = max_number
 
@@ -162,43 +152,13 @@ class TreeGenerator():
             op = rng.choice(self.unary_op, p=self.unary_op_probability)
             prefix.insert(pos, op)
         return ",".join(prefix)
-    
-    def _generate_float(self, rng=np.random):
-        """
-        generate random float for self._add_linear_transformations
-
-        `rng`: random number generator, default to np.random
-        """
-        sign = rng.choice([-1, 1])
-        mantissa = float(rng.choice(range(1, 10 ** self.precision)))
-        exponent = rng.randint(-2-self.precision,2-self.precision+1)
-        constant = sign * (mantissa * 10 ** exponent)
-        return str(constant)
-    
-    def _add_linear_transformations(self, prefix, target, rng=np.random):
-        """
-        add linear transformation for target in self.generate_tree
-
-        `prefix`: the prefix form of the given expression
-
-        `target`: List, containing everything which need to take linear transformation
-
-        `rng`: random number generator, default to np.random
-        """
-        prefix = prefix.split(',')
-
-        offset = 0
-        for i in range(len(prefix)):
-            if prefix[i + offset] in target:
-                a = self._generate_float(rng)
-                b = self._generate_float(rng)
-                prefix = prefix[:i + offset] + ["+", a, "*", b] + prefix[i+offset:]
-                offset += 4
-        return ",".join(prefix)
 
     def generate_tree_given_dimension_and_complexity(self, num_variables=None, complexity=None, rng=np.random):
         if num_variables is None and complexity is None:
-            return self.generate_tree(rng)
+            D = rng.randint(1, self.D_max + 1)
+            b_max = 5 + D
+            b = rng.randint(D - 1, D + b_max + 1)
+            u = rng.randint(0, self.u_max + 1)
         elif num_variables is None:
             D = rng.randint(1, self.D_max + 1)
             b = rng.randint(0, (complexity-1)//2 + 1)
@@ -299,7 +259,6 @@ class GeneticProgramming():
         self.fraction_replaced_hof = params.fraction_replaced_hof
         self.frecency_factor = frecency_factor
         self.max_complexity = params.max_complexity
-        self.discount_factor = params.discount_factor
         self.eps = params.eps
         self.optimize_probability = params.optimize_probability
         self.parsimony = params.parsimony
@@ -1388,7 +1347,7 @@ class GeneticProgramming():
         #self.timerecorder.record("migration", t2-t1)
         
 
-    def run(self, env, num_variables, xy, exprs=None, verbose=1):
+    def run(self, env, num_variables, xy, exprs=None, verbose=True):
 
         populations = self.create_population(env, num_variables, xy, exprs)
 
