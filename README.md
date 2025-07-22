@@ -17,11 +17,13 @@ conda activate PhyReg
 
 ## A Quick Start
 
-A pre-trained model training on 6M synthetic formulas is avaliable from [link](https://drive.google.com/drive/folders/14M0Ed0gvSKmtuTOornfEoup8l48IfEUW).
+A pre-trained model training on 6M synthetic formulas is avaliable from [Google Drive](https://drive.google.com/drive/folders/14M0Ed0gvSKmtuTOornfEoup8l48IfEUW).
 
 After downoading and replace it with the empty `model.pt` file, you can play with `example.ipynb` as a demo example.
 
-Other data which is necessary for training, evaluation and physics applications can be downloaded from [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should be placed in the `data` directory.
+Other data which is necessary for training, evaluation and physics applications can be downloaded from [Google Drive](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should be placed in the `data` directory.
+
+The whole data required to reproduce the experiments is also avaliable at [FigShare](https://doi.org/10.6084/m9.figshare.29615831.v1).
 
 ## Training
 
@@ -37,10 +39,10 @@ The training process consists of 100 epochs, with each epoch containing 500 trai
 
 The most useful hyper-parameters are presented in `./bash/train.sh`, which is listed below, while the others related are specified in parsers.py, and environment hyper-parameters are in envs/environment.py.
 
-- **`expr_train_data_path`**: The path to dataset for training. You can use our synthetic data in `data/exprs_train`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
-- **`expr_valid_data_path`**: The path to dataset for validation. You can use our synthetic data in `data/exprs_valid`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
-- **`sub_expr_train_path`**: The path to sub-formula dataset for training. You can use our synthetic data in `data/exprs_seperated_train`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
-- **`sub_expr_valid_path`**: The path to sub-formula dataset for validation. You can use our synthetic data in `data/exprs_seperated_valid`, available at [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`expr_train_data_path`**: The path to dataset for training. You can use our synthetic data in `data/exprs_train`, available at [Google Drive](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`expr_valid_data_path`**: The path to dataset for validation. You can use our synthetic data in `data/exprs_valid`, available at [Google Drive](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`sub_expr_train_path`**: The path to sub-formula dataset for training. You can use our synthetic data in `data/exprs_seperated_train`, available at [Google Drive](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
+- **`sub_expr_valid_path`**: The path to sub-formula dataset for validation. You can use our synthetic data in `data/exprs_seperated_valid`, available at [Google Drive](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), or use any specific data of your own.
 - **`max_epoch`**: The maximum training epochs.
 - **`n_steps_per_epoch`**: The maximum training steps for each epoch.
 - **`max_len`**: The maximum number of datapoints for each formula.
@@ -57,7 +59,7 @@ Using our pre-trained model to evaluate, run the following command to evaluate t
 
 If you want to use trained model on your own, just reload checkpoint by modifying parameter `reload_checkpoint` to the path of your training checkpoint.
 
-The Divide-and-Conquer strategy require training of oracle model, which is a little time-consuming. If you want to skip this, you can also downloaded our small oracle model from [link](https://drive.google.com/drive/folders/1VfH7Rp25U_pE504uhEd7dhSyvsBSXHdo), which should be placed at `Oracle_model` directory.
+The Divide-and-Conquer strategy require training of oracle model, which is a little time-consuming. If you want to skip this, you can also downloaded our small oracle model from [Google Drive](https://drive.google.com/drive/folders/1VfH7Rp25U_pE504uhEd7dhSyvsBSXHdo), which should be placed at `Oracle_model` directory.
 
 Similarly, the most useful hyper-parameters for evaluation are presented in `./bash/eval_synthetic.sh`, which is listed below,
 
@@ -73,7 +75,7 @@ Similarly, the most useful hyper-parameters for evaluation are presented in `./b
 
 The `physical` directory contains 5 physics application including SSN prediction, equator plasma pressure prediction, solar differential rotation prediction, contribution function prediction, lunar tide effect prediction.
 
-The data for each physics cases can be found from [link](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should also be placed in the `./data` directory, as mentioned above.
+The data for each physics cases can be found from [Google Drive](https://drive.google.com/drive/folders/17rbDLb2ZBgK9DidJtb1nyBFmGtOokhYs), and should also be placed in the `./data` directory, as mentioned above.
 
 There are five Jupyter notebooks in the `physical` directory, each corresponding to one of the five real-world physics Symbolic Regression cases in the paper. These applications depend on the code of PhysicsRegression. To generate the predicted formula using PhysicsRegression, you need to open the `PhysicsRegression` repository and run these notebooks.
 
