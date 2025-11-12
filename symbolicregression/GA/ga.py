@@ -1156,7 +1156,6 @@ class GeneticProgramming():
                 #do nothing
                 return E, "passss"
 
-            #TODO:check constrain
             t1 = time.time()
             satisfy_constrain = satisfy_constrain or self.check_constrain(new_E)
             attemp += 1

@@ -439,12 +439,17 @@ class Evaluator(object):
         )
 
         first_write = True
+        current_pos = 0
 
         pbar = tqdm(total=eval_size_per_gpu)
         batch_results = defaultdict(list)
         oracle = Oracle(env, env.generator, params)
 
         for samples, _ in iterator:
+
+            if current_pos < params.current_eval_pos:
+                current_pos += len(samples["x_to_fit"]) 
+                continue
 
             time1 = time.time()
 

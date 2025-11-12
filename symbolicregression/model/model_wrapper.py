@@ -213,7 +213,7 @@ class ModelWrapper(nn.Module):
                     src_len = x_len,
                     decode_physical_units = env.params.decode_physical_units,
                     max_len=self.max_generated_output_len,
-                    sample_temperature=None,
+                    sample_temperature=env.params.beam_temperature,
                     units = sampling_x_unit
                 )
 
