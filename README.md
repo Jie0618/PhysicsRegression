@@ -86,10 +86,18 @@ This project is covered under the Apache 2.0 License.
 ## Citation
 
 ```
-@article{ying2025neural,
-  title={A Neural Symbolic Model for Space Physics},
-  author={Ying, Jie and Lin, Haowei and Yue, Chao and Chen, Yajie and Xiao, Chao and Shi, Quanqi and Liang, Yitao and Yau, Shing-Tung and Zhou, Yuan and Ma, Jianzhu},
-  journal={arXiv preprint arXiv:2503.07994},
-  year={2025}
+ @article{Ying_Lin_Yue_Chen_Xiao_Shi_Liang_Yau_Zhou_Ma_2025, 
+  title={A neural symbolic model for space physics}, 
+  volume={7}, 
+  url={http://dx.doi.org/10.1038/s42256-025-01126-3}, 
+  DOI={10.1038/s42256-025-01126-3}, number={10}, 
+  journal={Nature Machine Intelligence}, 
+  publisher={Springer Science and Business Media LLC}, 
+  author={Ying, Jie and Lin, Haowei and Yue, Chao and Chen, Yajie and Xiao, Chao and Shi, Quanqi and Liang, Yitao and Yau, Shing-Tung and Zhou, Yuan and Ma, Jianzhu}, 
+  year={2025}, 
+  month=oct, 
+  pages={1726–1741}, 
+  language={en} 
 }
+
 ```
