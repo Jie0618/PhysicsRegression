@@ -1,6 +1,6 @@
 # A Neural Symbolic Model for Space Physics
 
-This repository contains code for the paper [A Neural Symbolic Model for Space Physics](XXX).
+This repository contains code for the paper [A Neural Symbolic Model for Space Physics](https://www.nature.com/articles/s42256-025-01126-3).
 
 If you encounter any problems with this program, please contact Jie Ying yingj24@mails.tsinghua.edu.cn.
 
